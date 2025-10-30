@@ -1,6 +1,18 @@
-import Footer from "@/components/footer"
-import ImageSlider from "@/components/image-slider"
+'use client'
+
+import dynamic from 'next/dynamic'
+import { useState } from 'react'
 import MaxWidthWrapper from "@/components/max-width-wrapper"
+import Navbar from "@/components/Navbar"
+import Sidebar from "@/components/dashboard/Sidebar"
+import MenuButton from "@/components/dashboard/MenuButton"
+
+const Footer = dynamic(() => import("@/components/footer"), {
+  ssr: true
+})
+const ImageSlider = dynamic(() => import("@/components/image-slider"), {
+  ssr: true
+})
 import { Button, buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import {
@@ -39,10 +51,16 @@ const perks = [
   },
 ]
 
-export default function Home() {
+export default function LandingPage() {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
   return (
-    <MaxWidthWrapper className="flex flex-col">
-      <div className="flex-grow flex-1">
+    <>
+      <Navbar />
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <MenuButton onClick={() => setSidebarOpen(true)} />
+      <MaxWidthWrapper className="flex flex-col pt-16">
+        <div className="flex-grow flex-1">
         <MaxWidthWrapper>
           <div className="grid grid-cols-1 gap-y-1 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-2 lg:gap-x-12">
             <div className="my-16 py-6 flex flex-col items-start justify-center">
@@ -62,7 +80,7 @@ export default function Home() {
                     }),
                     "text-base font-medium bg-rose-500 hover:bg-rose-600 text-white"
                   )}
-                  href="#"
+                  href="/donate"
                 >
                   Donate now
                 </Link>
@@ -74,7 +92,7 @@ export default function Home() {
                     }),
                     "text-base font-medium"
                   )}
-                  href="#"
+                  href="/about"
                 >
                   Learn more <ArrowRight className="w-4 h-4 ml-1.5" />
                 </Link>
@@ -95,11 +113,7 @@ export default function Home() {
               className="pointer-events-none absolute inset-x-0 -top-30 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
             >
               <div
-                style={{
-                  clipPath:
-                    "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
-                }}
-                className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-10 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"
+                className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-10 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem] [clip-path:polygon(74.1%_44.1%,100%_61.6%,97.5%_26.9%,85.5%_0.1%,80.7%_2%,72.5%_32.5%,60.2%_62.4%,52.4%_68.1%,47.5%_58.3%,45.2%_34.5%,27.5%_76.7%,0.1%_64.9%,17.9%_100%,27.6%_76.8%,76.1%_97.7%,74.1%_44.1%)]"
               />
             </div>
 
@@ -108,11 +122,7 @@ export default function Home() {
               className="pointer-events-none absolute inset-x-0 -top-30 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
             >
               <div
-                style={{
-                  clipPath:
-                    "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
-                }}
-                className="relative left-[calc(50%-13rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%-36rem)] sm:w-[72.1875rem]"
+                className="relative left-[calc(50%-13rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%-36rem)] sm:w-[72.1875rem] [clip-path:polygon(74.1%_44.1%,100%_61.6%,97.5%_26.9%,85.5%_0.1%,80.7%_2%,72.5%_32.5%,60.2%_62.4%,52.4%_68.1%,47.5%_58.3%,45.2%_34.5%,27.5%_76.7%,0.1%_64.9%,17.9%_100%,27.6%_76.8%,76.1%_97.7%,74.1%_44.1%)]"
               />
             </div>
           </div>
@@ -299,7 +309,7 @@ export default function Home() {
                     <Phone className="h-5 w-5 text-rose-600 mr-3 mt-0.5" />
                     <div>
                       <p className="font-medium">Phone</p>
-                      <p className="text-gray-600">+254 123 456 789</p>
+                      <p className="text-gray-600">+254 114 010 696</p>
                     </div>
                   </div>
                   <div className="flex items-start">
@@ -307,7 +317,7 @@ export default function Home() {
                     <div>
                       <p className="font-medium">Email</p>
                       <p className="text-gray-600">
-                        info@wamumbifoundation.org
+                        wamumbifoundation@gmail.com
                       </p>
                     </div>
                   </div>
@@ -324,18 +334,21 @@ export default function Home() {
                 <div className="mt-8 flex space-x-4">
                   <a
                     href="#"
+                    aria-label="Visit our Facebook page"
                     className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
                   >
                     <Facebook className="h-5 w-5 text-gray-700" />
                   </a>
                   <a
                     href="#"
+                    aria-label="Follow us on Twitter"
                     className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
                   >
                     <Twitter className="h-5 w-5 text-gray-700" />
                   </a>
                   <a
                     href="#"
+                    aria-label="Follow us on Instagram"
                     className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
                   >
                     <Instagram className="h-5 w-5 text-gray-700" />
@@ -399,7 +412,7 @@ export default function Home() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500"
                     ></textarea>
                   </div>
-                  <Button className="bg-rose-600 hover:bg-rose-700 w-full">
+                  <Button className="bg-rose-600 hover:bg-rose-700 text-white w-full">
                     Send Message
                   </Button>
                 </form>
@@ -427,9 +440,11 @@ export default function Home() {
                   Your financial contribution helps us provide essential
                   services to children and their guardians.
                 </p>
-                <Button className="bg-rose-600 hover:bg-rose-700 w-full">
-                  Donate Now
-                </Button>
+                <Link href="/donate">
+                  <Button className="bg-rose-600 hover:bg-rose-700 text-white w-full">
+                    Donate Now
+                  </Button>
+                </Link>
               </div>
               <div className="bg-white p-6 rounded-lg shadow-md text-center">
                 <h3 className="text-xl font-bold mb-3">Volunteer</h3>
@@ -437,9 +452,11 @@ export default function Home() {
                   Share your time and skills to directly impact the lives of the
                   children we serve.
                 </p>
-                <Button variant="outline" className="w-full">
-                  Join Our Team
-                </Button>
+                <Link href="/volunteer-signup">
+                  <Button variant="outline" className="w-full hover:bg-rose-50 hover:text-rose-600 hover:border-rose-600">
+                    Join Our Team
+                  </Button>
+                </Link>
               </div>
               <div className="bg-white p-6 rounded-lg shadow-md text-center">
                 <h3 className="text-xl font-bold mb-3">Partner With Us</h3>
@@ -447,17 +464,20 @@ export default function Home() {
                   Organizations and businesses can partner with us to create
                   sustainable impact.
                 </p>
-                <Button variant="outline" className="w-full">
-                  Become a Partner
-                </Button>
+                <Link href="/partner-with-us">
+                  <Button variant="outline" className="w-full hover:bg-rose-50 hover:text-rose-600 hover:border-rose-600">
+                    Become a Partner
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
         </section>
       </div>
+      </MaxWidthWrapper>
 
       {/* Footer */}
       <Footer />
-    </MaxWidthWrapper>
+    </>
   )
 }
