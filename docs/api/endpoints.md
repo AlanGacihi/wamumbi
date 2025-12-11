@@ -1,654 +1,608 @@
-# API Endpoints
+# tRPC Procedures
 
-This document provides detailed information about all available API endpoints in the Wamumbi Charity Management System.
+This document provides detailed information about all available tRPC procedures in the Wamumbi Charity Management System.
 
 ## Table of Contents
 
-- [Users](#users)
-- [Donations](#donations)
+- [Authentication](#authentication)
+- [Dashboard](#dashboard)
 - [Campaigns](#campaigns)
-- [Volunteers](#volunteers)
-- [Events](#events)
-- [Projects](#projects)
+- [Donations](#donations)
 - [Teams](#teams)
+- [Events](#events)
+- [Volunteers](#volunteers)
 - [Blog Posts](#blog-posts)
-- [Notifications](#notifications)
 
 ---
 
-## Users
+## Authentication
 
-### Get Current User Profile
+### authCallback
 
-```http
-GET /api/users/profile
-```
+**Type:** Mutation
 
-**Response:**
+**Description:** Handles user authentication callback from Clerk, creating or updating user in database.
 
-```json
+**Input:** None
+
+**Output:**
+
+```typescript
 {
-  "success": true,
-  "data": {
-    "id": 1,
-    "email": "john@example.com",
-    "firstName": "John",
-    "lastName": "Doe",
-    "phone": "+1234567890",
-    "role": "volunteer",
-    "status": "active",
-    "profileImage": "/images/profile.jpg",
-    "createdAt": "2025-01-15T10:00:00Z",
-    "lastLogin": "2025-01-20T14:30:00Z"
+  user: {
+    id: number;
+    clerkId: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    imageUrl?: string;
+    // ... other user fields
   }
 }
 ```
 
-### Update User Profile
-
-```http
-PATCH /api/users/profile
-```
-
-**Request Body:**
-
-```json
-{
-  "firstName": "John",
-  "lastName": "Doe",
-  "phone": "+1234567890",
-  "profileImage": "/images/new-profile.jpg"
-}
-```
-
-### Get All Users (Admin Only)
-
-```http
-GET /api/users?page=1&limit=20&role=volunteer&status=active
-```
-
-**Query Parameters:**
-
-- `page` (optional): Page number (default: 1)
-- `limit` (optional): Items per page (default: 20)
-- `role` (optional): Filter by user role
-- `status` (optional): Filter by status
-
 ---
 
-## Donations
+## Dashboard
 
-### Create Donation
+### getStats
 
-```http
-POST /api/donations
-```
+**Type:** Query
 
-**Request Body:**
+**Description:** Retrieves dashboard statistics including total donations, active campaigns, volunteers, etc.
 
-```json
+**Input:** None
+
+**Output:**
+
+```typescript
 {
-  "campaignId": 123,
-  "amount": 100.00,
-  "paymentMethod": "credit_card",
-  "isAnonymous": false,
-  "isRecurring": false,
-  "recurringFrequency": null,
-  "notes": "Happy to support this cause!"
+  totalDonations: number;
+  totalCampaigns: number;
+  activeVolunteers: number;
+  totalEvents: number;
+  // ... other stats
 }
-```
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "data": {
-    "id": 456,
-    "amount": 100.00,
-    "status": "completed",
-    "paymentReference": "pi_1234567890",
-    "donationDate": "2025-01-20T15:00:00Z"
-  }
-}
-```
-
-### Get Donation History
-
-```http
-GET /api/donations?page=1&limit=10&campaignId=123
-```
-
-### Get Donation Details
-
-```http
-GET /api/donations/{id}
-```
-
-### Process Recurring Donation
-
-```http
-POST /api/donations/{id}/process-recurring
 ```
 
 ---
 
 ## Campaigns
 
-### Get All Campaigns
+### getActive
 
-```http
-GET /api/campaigns?page=1&limit=12&category=water_projects&status=active
-```
+**Type:** Query
 
-**Query Parameters:**
+**Description:** Retrieves active campaigns with statistics.
 
-- `page` (optional): Page number
-- `limit` (optional): Items per page
-- `category` (optional): Filter by category
-- `status` (optional): Filter by status
+**Input:** None
 
-**Response:**
+**Output:** Array of active campaigns with progress information.
 
-```json
+### getAll
+
+**Type:** Query
+
+**Description:** Retrieves all campaigns with full details.
+
+**Input:** None
+
+**Output:** Array of all campaigns.
+
+### getById
+
+**Type:** Query
+
+**Description:** Retrieves a specific campaign by ID.
+
+**Input:**
+
+```typescript
 {
-  "success": true,
-  "data": {
-    "campaigns": [
-      {
-        "id": 123,
-        "title": "Clean Water for Rural Communities",
-        "description": "Providing clean water access to 500 families",
-        "goalAmount": 50000.00,
-        "currentAmount": 25000.00,
-        "category": "water_projects",
-        "status": "active",
-        "startDate": "2025-01-01",
-        "endDate": "2025-06-30",
-        "imageUrl": "/images/campaign-123.jpg",
-        "progress": 50
-      }
-    ],
-    "pagination": {
-      "currentPage": 1,
-      "totalPages": 5,
-      "totalItems": 50
-    }
-  }
+  id: number;
 }
 ```
 
-### Create Campaign
+**Output:** Campaign details with statistics.
 
-```http
-POST /api/campaigns
-```
+### create
 
-**Request Body:**
+**Type:** Mutation
 
-```json
+**Description:** Creates a new campaign with proper date validation using z.coerce.date().
+
+**Input:**
+
+```typescript
 {
-  "title": "Education for All",
-  "description": "Supporting education in underserved communities",
-  "goalAmount": 30000.00,
-  "category": "education",
-  "startDate": "2025-02-01",
-  "endDate": "2025-08-31",
-  "imageUrl": "/images/education-campaign.jpg"
+  title: string;
+  description: string;
+  goalAmount: number;
+  startDate: Date; // Uses z.coerce.date() for validation
+  endDate: Date;   // Uses z.coerce.date() for validation
+  categoryId: number;
+  urgencyLevelId: number;
+  statusId: number;
+  imageUrl?: string;
 }
 ```
 
-### Update Campaign
+**Output:** Created campaign with all fields.
 
-```http
-PATCH /api/campaigns/{id}
+### update
+
+**Type:** Mutation
+
+**Description:** Updates an existing campaign with date validation.
+
+**Input:** Campaign update data with ID (same schema as create, plus id)
+
+**Output:** Updated campaign
+
+### delete
+
+**Type:** Mutation
+
+**Description:** Deletes a campaign.
+
+**Input:**
+
+```typescript
+{
+  id: number;
+}
 ```
 
-### Delete Campaign
-
-```http
-DELETE /api/campaigns/{id}
-```
+**Output:** Success confirmation
 
 ---
 
-## Volunteers
+## Donations
 
-### Register as Volunteer
+### getAll
 
-```http
-POST /api/volunteers
-```
+**Type:** Query
 
-**Request Body:**
+**Description:** Retrieves all donations with filtering options.
 
-```json
+**Input:** Optional filters (campaignId, donorId, etc.)
+
+**Output:** Array of donations
+
+### getById
+
+**Type:** Query
+
+**Description:** Retrieves a specific donation by ID.
+
+**Input:**
+
+```typescript
 {
-  "skills": "Construction, Project Management, Community Outreach",
-  "availability": "Weekends and evenings",
-  "emergencyContactName": "Jane Doe",
-  "emergencyContactPhone": "+1234567890"
+  id: number;
 }
 ```
 
-### Get Volunteer Profile
+**Output:** Donation details
 
-```http
-GET /api/volunteers/profile
-```
+### create
 
-### Log Volunteer Activity
+**Type:** Mutation
 
-```http
-POST /api/volunteers/activities
-```
+**Description:** Creates a new donation.
 
-**Request Body:**
+**Input:** Donation creation data
 
-```json
-{
-  "activityType": "project_work",
-  "description": "Helped build water well foundation",
-  "hoursLogged": 8.5,
-  "activityDate": "2025-01-20",
-  "projectId": 456
-}
-```
+**Output:** Created donation
 
-### Get Volunteer Activities
+### update
 
-```http
-GET /api/volunteers/activities?page=1&limit=10
-```
+**Type:** Mutation
 
-### Update Volunteer Status
+**Description:** Updates donation status.
 
-```http
-PATCH /api/volunteers/status
-```
+**Input:** Donation update data
 
-**Request Body:**
-
-```json
-{
-  "status": "active"
-}
-```
-
----
-
-## Events
-
-### Get All Events
-
-```http
-GET /api/events?page=1&limit=10&status=upcoming
-```
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "data": {
-    "events": [
-      {
-        "id": 789,
-        "title": "Annual Charity Gala",
-        "description": "Join us for an evening of celebration and fundraising",
-        "eventDate": "2025-03-15T19:00:00Z",
-        "location": "Community Center, Main St",
-        "capacity": 200,
-        "ticketPrice": 50.00,
-        "status": "upcoming",
-        "imageUrl": "/images/gala-2025.jpg",
-        "registeredCount": 85
-      }
-    ]
-  }
-}
-```
-
-### Create Event
-
-```http
-POST /api/events
-```
-
-**Request Body:**
-
-```json
-{
-  "title": "Community Clean-up Day",
-  "description": "Join us to clean up the local park",
-  "eventDate": "2025-02-28T09:00:00Z",
-  "location": "Central Park, East Side",
-  "capacity": 50,
-  "ticketPrice": 0.00,
-  "imageUrl": "/images/cleanup-event.jpg"
-}
-```
-
-### Register for Event
-
-```http
-POST /api/events/{id}/register
-```
-
-**Request Body:**
-
-```json
-{
-  "specialRequirements": "Vegetarian meal option needed"
-}
-```
-
-### Get Event Registrations (Admin/Organizer)
-
-```http
-GET /api/events/{id}/registrations
-```
-
----
-
-## Projects
-
-### Get All Projects
-
-```http
-GET /api/projects?page=1&limit=10&status=active&teamId=123
-```
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "data": {
-    "projects": [
-      {
-        "id": 456,
-        "title": "Water Well Construction - Village A",
-        "description": "Building a new water well to serve 200 families",
-        "teamId": 123,
-        "campaignId": 789,
-        "startDate": "2025-01-15",
-        "endDate": "2025-04-15",
-        "progressPercentage": 35,
-        "status": "active",
-        "budget": 15000.00,
-        "location": "Village A, Region B"
-      }
-    ]
-  }
-}
-```
-
-### Create Project
-
-```http
-POST /api/projects
-```
-
-**Request Body:**
-
-```json
-{
-  "title": "School Library Setup",
-  "description": "Setting up a new library with 1000 books",
-  "teamId": 456,
-  "campaignId": 789,
-  "startDate": "2025-02-01",
-  "endDate": "2025-05-01",
-  "budget": 8000.00,
-  "location": "ABC Elementary School"
-}
-```
-
-### Update Project Progress
-
-```http
-PATCH /api/projects/{id}/progress
-```
-
-**Request Body:**
-
-```json
-{
-  "progressPercentage": 65,
-  "notes": "Foundation completed, starting wall construction"
-}
-```
+**Output:** Updated donation
 
 ---
 
 ## Teams
 
-### Get All Teams
+### getAll
 
-```http
-GET /api/teams?page=1&limit=10&category=water_projects
-```
+**Type:** Query
 
-### Create Team
+**Description:** Retrieves all teams.
 
-```http
-POST /api/teams
-```
+**Input:** None
 
-**Request Body:**
+**Output:** Array of teams
 
-```json
+### getById
+
+**Type:** Query
+
+**Description:** Retrieves a specific team by ID.
+
+**Input:**
+
+```typescript
 {
-  "name": "Water Projects Team Alpha",
-  "description": "Specialized team for water infrastructure projects",
-  "category": "water_projects"
+  id: number;
 }
 ```
 
-### Join Team
+**Output:** Team details with members
 
-```http
-POST /api/teams/{id}/join
-```
+### create
 
-### Leave Team
+**Type:** Mutation
 
-```http
-DELETE /api/teams/{id}/leave
-```
+**Description:** Creates a new team.
 
-### Team Communications
+**Input:** Team creation data
 
-```http
-POST /api/teams/{id}/communications
-```
+**Output:** Created team
 
-**Request Body:**
+### update
 
-```json
+**Type:** Mutation
+
+**Description:** Updates a team.
+
+**Input:** Team update data
+
+**Output:** Updated team
+
+### delete
+
+**Type:** Mutation
+
+**Description:** Deletes a team.
+
+**Input:**
+
+```typescript
 {
-  "messageType": "announcement",
-  "title": "Project Update",
-  "content": "Great progress on the water well project!"
+  id: number;
 }
 ```
+
+**Output:** Success confirmation
+
+### addMember
+
+**Type:** Mutation
+
+**Description:** Adds a member to a team.
+
+**Input:** Team and user IDs
+
+**Output:** Updated team membership
+
+### removeMember
+
+**Type:** Mutation
+
+**Description:** Removes a member from a team.
+
+**Input:** Team and user IDs
+
+**Output:** Success confirmation
+
+### getCategories
+
+**Type:** Query
+
+**Description:** Retrieves available team categories.
+
+**Input:** None
+
+**Output:** Array of categories
+
+---
+
+## Events
+
+### getUpcoming
+
+**Type:** Query
+
+**Description:** Retrieves upcoming events.
+
+**Input:** None
+
+**Output:** Array of upcoming events
+
+### getAll
+
+**Type:** Query
+
+**Description:** Retrieves all events with full details.
+
+**Input:** None
+
+**Output:** Array of events
+
+### getById
+
+**Type:** Query
+
+**Description:** Retrieves a specific event by ID.
+
+**Input:**
+
+```typescript
+{
+  id: number;
+}
+```
+
+**Output:** Event details with registrations
+
+### create
+
+**Type:** Mutation
+
+**Description:** Creates a new event with proper date validation using z.coerce.date().
+
+**Input:**
+
+```typescript
+{
+  title: string;
+  description: string;
+  eventDate: Date; // Uses z.coerce.date() for validation
+  location: string;
+  maxAttendees?: number;
+  eventTypeId: number;
+  categoryId: number;
+  statusId: number;
+  imageUrl?: string;
+}
+```
+
+**Output:** Created event
+
+### update
+
+**Type:** Mutation
+
+**Description:** Updates an existing event with date validation.
+
+**Input:** Event update data with ID (same schema as create, plus id)
+
+**Output:** Updated event
+
+### delete
+
+**Type:** Mutation
+
+**Description:** Deletes an event.
+
+**Input:**
+
+```typescript
+{
+  id: number;
+}
+```
+
+**Output:** Success confirmation
+
+### register
+
+**Type:** Mutation
+
+**Description:** Registers a user for an event.
+
+**Input:** Event ID and registration data
+
+**Output:** Registration confirmation
+
+---
+
+## Volunteers
+
+### getAll
+
+**Type:** Query
+
+**Description:** Retrieves all volunteers with their details.
+
+**Input:** None
+
+**Output:** Array of volunteers
+
+### getById
+
+**Type:** Query
+
+**Description:** Retrieves a specific volunteer by ID.
+
+**Input:**
+
+```typescript
+{
+  id: number;
+}
+```
+
+**Output:** Volunteer details with skills and activities
+
+### create
+
+**Type:** Mutation
+
+**Description:** Registers a new volunteer.
+
+**Input:** Volunteer registration data
+
+**Output:** Created volunteer
+
+### createWithUser
+
+**Type:** Mutation
+
+**Description:** Creates a new user and volunteer with emergency contact in one transaction. Enables seamless volunteer registration without requiring pre-existing users.
+
+**Input:**
+
+```typescript
+{
+  // User data
+  email: string;
+  firstName: string;
+  lastName: string;
+  // Volunteer data
+  phoneNumber: string;
+  dateOfBirth: Date; // Uses z.coerce.date() for validation
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  volunteerRoleId: number;
+  skills: number[]; // Array of skill IDs
+  availability: string;
+  // Emergency contact
+  emergencyContactName: string;
+  emergencyContactPhone: string;
+  emergencyContactRelationship: string;
+}
+```
+
+**Output:** Created volunteer with user and emergency contact information
+
+### update
+
+**Type:** Mutation
+
+**Description:** Updates volunteer information.
+
+**Input:** Volunteer update data
+
+**Output:** Updated volunteer
+
+### delete
+
+**Type:** Mutation
+
+**Description:** Removes a volunteer.
+
+**Input:**
+
+```typescript
+{
+  id: number;
+}
+```
+
+**Output:** Success confirmation
+
+### logActivity
+
+**Type:** Mutation
+
+**Description:** Logs volunteer activity hours.
+
+**Input:** Activity logging data
+
+**Output:** Logged activity
+
+### getSkills
+
+**Type:** Query
+
+**Description:** Retrieves available volunteer skills.
+
+**Input:** None
+
+**Output:** Array of skills
+
+### getStatuses
+
+**Type:** Query
+
+**Description:** Retrieves volunteer status options.
+
+**Input:** None
+
+**Output:** Array of statuses
 
 ---
 
 ## Blog Posts
 
-### Get All Blog Posts
+### getAll
 
-```http
-GET /api/blog?page=1&limit=10&category=water_projects&status=published
-```
+**Type:** Query
 
-### Create Blog Post
+**Description:** Retrieves all blog posts.
 
-```http
-POST /api/blog
-```
+**Input:** Optional filters
 
-**Request Body:**
+**Output:** Array of blog posts
 
-```json
+### getById
+
+**Type:** Query
+
+**Description:** Retrieves a specific blog post by ID.
+
+**Input:**
+
+```typescript
 {
-  "title": "Impact of Clean Water Projects",
-  "content": "Full blog post content here...",
-  "excerpt": "A brief summary of the impact...",
-  "category": "water_projects",
-  "featuredImage": "/images/blog-featured.jpg"
+  id: number;
 }
 ```
 
-### Publish Blog Post
+**Output:** Blog post details
 
-```http
-PATCH /api/blog/{id}/publish
+### create
+
+**Type:** Mutation
+
+**Description:** Creates a new blog post.
+
+**Input:** Blog post creation data
+
+**Output:** Created blog post
+
+### update
+
+**Type:** Mutation
+
+**Description:** Updates a blog post.
+
+**Input:** Blog post update data
+
+**Output:** Updated blog post
+
+### delete
+
+**Type:** Mutation
+
+**Description:** Deletes a blog post.
+
+**Input:**
+
+```typescript
+{
+  id: number;
+}
 ```
+
+**Output:** Success confirmation
 
 ---
 
-## Notifications
+## Common Patterns
 
-### Get User Notifications
+### Filtering and Sorting
 
-```http
-GET /api/notifications?page=1&limit=20&isRead=false
-```
-
-### Mark Notification as Read
-
-```http
-PATCH /api/notifications/{id}/read
-```
-
-### Mark All Notifications as Read
-
-```http
-PATCH /api/notifications/mark-all-read
-```
-
----
-
-## Error Responses
-
-All endpoints may return the following error responses:
-
-### 400 Bad Request
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "INVALID_INPUT",
-    "message": "Validation failed",
-    "details": {
-      "field": "email",
-      "message": "Email is required"
-    }
-  }
-}
-```
-
-### 401 Unauthorized
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "UNAUTHORIZED",
-    "message": "Authentication required"
-  }
-}
-```
-
-### 403 Forbidden
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "FORBIDDEN",
-    "message": "Insufficient permissions for this operation"
-  }
-}
-```
-
-### 404 Not Found
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "NOT_FOUND",
-    "message": "Resource not found"
-  }
-}
-```
-
-### 422 Validation Error
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Input validation failed",
-    "details": {
-      "amount": "Amount must be greater than 0",
-      "email": "Email format is invalid"
-    }
-  }
-}
-```
-
----
-
-## Pagination
-
-Most list endpoints support pagination with the following parameters:
-
-- `page`: Page number (starts from 1)
-- `limit`: Number of items per page (default: 20, max: 100)
-
-Response includes pagination metadata:
-
-```json
-{
-  "success": true,
-  "data": {
-    "items": [...],
-    "pagination": {
-      "currentPage": 1,
-      "totalPages": 10,
-      "totalItems": 200,
-      "hasNext": true,
-      "hasPrev": false
-    }
-  }
-}
-```
-
----
-
-## Authentication Requirements
-
-All API endpoints are protected using Clerk authentication middleware. For detailed information about:
-
-- Authentication flows
-- Session handling
-- API protection
-- Role-based access control
-- Security headers
-- Token management
-
-Please refer to [Authentication Documentation](./authentication.md).
-
-## Filtering and Sorting
-
-Many endpoints support filtering and sorting:
+Many procedures support filtering and sorting:
 
 ### Common Filters
 
@@ -662,8 +616,15 @@ Many endpoints support filtering and sorting:
 - `sortBy`: Field to sort by
 - `sortOrder`: `asc` or `desc`
 
-Example:
+### Error Handling
 
-```http
-GET /api/campaigns?status=active&sortBy=createdAt&sortOrder=desc&search=water
-```
+All procedures throw `TRPCError` with appropriate codes:
+
+- `UNAUTHORIZED`: Authentication required
+- `FORBIDDEN`: Insufficient permissions
+- `NOT_FOUND`: Resource not found
+- `BAD_REQUEST`: Invalid input
+
+### Type Safety
+
+All inputs and outputs are fully typed with TypeScript. The tRPC client provides end-to-end type safety.

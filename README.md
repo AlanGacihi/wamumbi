@@ -10,8 +10,10 @@ A comprehensive digital platform for the Wamumbi Foundation to manage charitable
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
+  - [Database Setup](#database-setup)
 - [Documentation](#documentation)
 - [Usage](#usage)
+- [Recent Updates](#recent-updates)
 - [Contributing](#contributing)
 - [License](#license)
 - [Acknowledgments](#acknowledgments)
@@ -20,36 +22,44 @@ A comprehensive digital platform for the Wamumbi Foundation to manage charitable
 
 Wamumbi is a modern charity management system built to streamline operations for non-profit organizations. The platform enables efficient management of:
 
-- **Donations & Fundraising**: Secure donation processing and campaign management
-- **Volunteer Coordination**: Volunteer registration, activity tracking, and team management
-- **Project Management**: Track charitable projects from planning to completion
-- **Event Organization**: Manage charity events and community gatherings
-- **Impact Reporting**: Generate reports on charitable activities and outcomes
+- **Donations & Fundraising**: Complete donation processing and campaign management with seeded reference data
+- **Volunteer Coordination**: Comprehensive volunteer registration and management with user creation
+- **Project Management**: Project tracking and coordination
+- **Event Organization**: Full event creation, management, and editing capabilities
+- **Impact Reporting**: Reporting on activities and impact metrics
+- **User Authentication**: Secure authentication with Clerk integration and proper sign-out functionality
 
 ## Features
 
 ### 🎯 Core Functionality
 
-- **Multi-role User Management**: Admin, Team Leader, Volunteer, and Donor roles
-- **Campaign Management**: Create and track fundraising campaigns with real-time progress
-- **Donation Processing**: Secure payment processing with multiple payment methods
-- **Volunteer Portal**: Skills-based volunteer matching and activity logging
-- **Project Tracking**: Complete project lifecycle management with team collaboration
-- **Event Management**: Event creation, registration, and attendance tracking
+- **Advanced User Management**: Admin, Team Leader, Volunteer, and Donor roles with Clerk authentication
+- **Campaign Management**: Create, view, and manage fundraising campaigns with seeded categories and urgency levels
+- **Donation Processing**: Donation tracking with M-Pesa payment instructions and seeded currencies
+- **Volunteer Portal**: Complete volunteer registration with automatic user creation and emergency contact management
+- **Project Tracking**: Project management and coordination
+- **Event Management**: Full CRUD operations for events with category management
+- **Database Seeding**: Comprehensive seed data for all reference tables (currencies, categories, statuses, etc.)
 
 ### 💳 Financial Management
 
-- Real-time donation tracking and reporting
-- Recurring donation support
-- Multiple payment gateway integration
-- Financial audit trails and reporting
+- Donation tracking with multiple currency support
+- Donation history and reporting
+- Campaign progress tracking
 
 ### 👥 Community Features
 
-- Team communication and collaboration tools
-- Blog and content management system
-- Notification system for stakeholders
-- Anonymous donation options
+- Volunteer registration and management with user synchronization
+- Event creation, editing, and management
+- Emergency contact management for volunteers
+
+### 🔧 Technical Features
+
+- **Type-Safe API**: tRPC with automatic type generation
+- **Database Integration**: Prisma ORM with Neon PostgreSQL adapter
+- **Authentication**: Clerk integration with proper sign-out functionality
+- **Form Validation**: Zod schema validation with date coercion
+- **Real-time Updates**: TanStack Query for optimistic updates and cache management
 
 ## Architecture
 
@@ -57,11 +67,12 @@ Wamumbi is built using modern web technologies with a focus on scalability and m
 
 ### Technology Stack
 
-- **Frontend**: Next.js 14+ with TypeScript, Tailwind CSS, and Shadcn/UI components
-- **Backend**: Next.js API Routes with TypeScript
-- **Database**: PostgreSQL with Prisma ORM
+- **Frontend**: Next.js 15 with TypeScript, Tailwind CSS, and Shadcn/UI components
+- **Backend**: tRPC with Next.js for type-safe API communication
+- **Database**: PostgreSQL with Prisma ORM and Neon serverless adapter
 - **Authentication**: Clerk for secure user authentication and authorization
-- **Payments**: Integrated payment processing (Stripe/PayPal)
+- **State Management**: TanStack Query for server state management
+- **Payments**: M-Pesa payment instructions with multi-currency support
 - **Deployment**: Vercel (Frontend) with cloud database hosting
 
 ### System Architecture
@@ -69,22 +80,32 @@ Wamumbi is built using modern web technologies with a focus on scalability and m
 ```text
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Frontend      │    │   API Layer     │    │   Database      │
-│   (Next.js)     │◄──►│   (API Routes)  │◄──►│   (PostgreSQL)  │
+│   (Next.js)     │◄──►│   (tRPC)        │◄──►│   (PostgreSQL)  │
 │                 │    │                 │    │                 │
 │ - Dashboard     │    │ - Auth Routes   │    │ - User Data     │
-│ - Campaigns     │    │ - CRUD APIs     │    │ - Donations     │
-│ - Volunteer     │    │ - Payment APIs  │    │ - Projects      │
-│ - Events        │    │ - File Upload   │    │ - Events        │
+│ - Campaigns     │    │ - CRUD Operations│    │ - Donations     │
+│ - Volunteers    │    │ - Type-Safe APIs │    │ - Projects      │
+│ - Events        │    │ - Clerk Integration│    │ - Events        │
+│ - Real-time UI  │    │                 │    │ - Seed Data      │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
+
+### Key Components
+
+- **Database Seeding**: Comprehensive seed data for all reference tables
+- **Type Safety**: End-to-end type safety with tRPC and Prisma
+- **Authentication**: Clerk integration with proper user management
+- **Form Validation**: Zod schemas with automatic date coercion
+- **Optimistic Updates**: Real-time UI updates with TanStack Query
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 18+ and npm/yarn/pnpm
-- PostgreSQL database
+- PostgreSQL database (Neon recommended)
 - Git for version control
+- Clerk account for authentication
 
 ### Installation
 
@@ -106,17 +127,37 @@ Wamumbi is built using modern web technologies with a focus on scalability and m
   
    ```bash
    cp .env.example .env.local
-   # Configure your database, Clerk, and payment provider keys
+   # Configure your database URL, Clerk keys, and other environment variables
    ```
 
-4. **Set up the database**
+### Database Setup
+
+1. **Configure Prisma**
   
    ```bash
-   npx prisma migrate dev
    npx prisma generate
    ```
 
-5. **Start the development server**
+2. **Run database migrations**
+  
+   ```bash
+   npx prisma db push --config=prisma/prisma.config.ts
+   ```
+
+3. **Seed the database with reference data**
+  
+   ```bash
+   npm run db:seed
+   ```
+
+   This will populate all lookup tables with essential data:
+   - User roles and statuses
+   - Currencies and payment methods
+   - Campaign categories and urgency levels
+   - Event categories and statuses
+   - Volunteer skills and background check statuses
+
+4. **Start the development server**
   
    ```bash
    npm run dev
@@ -128,7 +169,7 @@ Visit `http://localhost:3000` to see the application.
 
 Comprehensive documentation is available in the `docs/` directory:
 
-- 📖 **[API Documentation](docs/api/README.md)** - REST API endpoints and authentication
+- 📖 **[API Documentation](docs/api/README.md)** - tRPC procedures and authentication
 - 🗄️ **[Database Documentation](docs/database/README.md)** - Schema design and data models
 - 🎨 **[Frontend Documentation](docs/frontend/README.md)** - Component architecture and styling
 - 🚀 **[Deployment Guide](docs/deployment/README.md)** - Development and production deployment
@@ -137,31 +178,62 @@ Comprehensive documentation is available in the `docs/` directory:
 
 ### For Administrators
 
-- Manage user roles and permissions
-- Create and oversee fundraising campaigns
-- Generate reports on donations and activities
-- Configure system settings
+- Complete user management with Clerk authentication
+- Create and manage fundraising campaigns with seeded categories
+- View comprehensive donation and impact reports
+- Manage volunteers and events with full CRUD operations
+- Access seeded reference data for all system entities
 
 ### For Team Leaders
 
 - Manage volunteer teams and projects
-- Track project progress and milestones
-- Coordinate team communications
-- Organize events and activities
+- Track project progress and impact metrics
+- Organize and edit events with category management
 
 ### For Volunteers
 
-- View available volunteer opportunities
-- Log volunteer hours and activities
-- Participate in team discussions
-- Track personal contribution history
+- Register as volunteers with automatic user account creation
+- View volunteer opportunities and manage profiles
+- Access emergency contact management
 
-### For Donors
+## Recent Updates
 
-- Make one-time or recurring donations
-- Track donation history
-- Support specific campaigns or projects
-- Receive impact updates
+### ✅ Database & Seeding
+
+- **Comprehensive Database Seeding**: Created complete seed data for all reference tables including currencies, categories, statuses, skills, and notification types
+- **Schema Synchronization**: Fixed database schema sync issues with Prisma db push
+- **Neon Adapter Integration**: Proper configuration for Neon serverless PostgreSQL
+
+### ✅ Campaign Management
+
+- **Date Validation Fixes**: Implemented `z.coerce.date()` for proper date handling in forms
+- **Campaign Details**: Fixed campaign detail viewing with proper data loading
+- **Form Validation**: Enhanced form validation with automatic date coercion
+
+### ✅ Volunteer Management
+
+- **User Creation Integration**: Implemented `createWithUser` mutation for seamless volunteer registration
+- **Emergency Contact Management**: Added emergency contact handling during volunteer creation
+- **Dynamic UI Updates**: Real-time UI updates with TanStack Query cache invalidation
+
+### ✅ Event Management
+
+- **Full CRUD Operations**: Added complete create, read, update, and delete functionality
+- **Event Editing**: Implemented event editing with form pre-population
+- **Date Handling**: Fixed date validation issues across all event operations
+
+### ✅ Authentication & UI
+
+- **Sign Out Functionality**: Fixed sidebar sign out button to properly use Clerk's signOut
+- **User Display**: Updated sidebar to show actual Clerk user information instead of hardcoded data
+- **Real-time Updates**: Implemented optimistic updates and proper cache management
+
+### ✅ Technical Improvements
+
+- **Type Safety**: Enhanced tRPC procedures with proper error handling
+- **Form Validation**: Improved Zod schemas with date coercion
+- **Error Handling**: Better error messages and user feedback
+- **Performance**: Optimized database queries and UI updates
 
 ## Contributing
 
